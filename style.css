@@ -43,11 +43,25 @@ body {
   border-radius: 3px;
 }
 
-.font-size-group {
+.font-size-prop {
   padding: 0.2rem;
   border: none;
   outline: none;
   border-radius: 3px;
+}
+
+.color-prop {
+  position: relative;
+}
+
+.color-prop > input {
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  left: 0;
+
+  height: 100%;
+  width: 100%;
 }
 
 /* ------------------ formula container ---------------- */
@@ -101,7 +115,7 @@ body {
 }
 
 .address-col-cont {
-  position: relative;
+  position: absolute;
   top: 2rem;
 }
 
