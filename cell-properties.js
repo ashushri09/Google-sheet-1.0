@@ -15,6 +15,9 @@ for (let i = 0; i < numberOfRows; i++) {
       fontSize: 14,
       fontColor: "#000000",
       bgColor: "#000000",
+      value: "",
+      formula: "",
+      children: [],
     };
 
     rowDB.push(db);
@@ -163,7 +166,7 @@ alignment.forEach((alignElem) => {
 
     let cell = document.querySelector(`.cell[rid="${rowId}"][cid="${colId}"]`);
 
-    let alignValue = e.target.classList[0];
+    let alignValue = e.target.classList[2];
 
     sheetDB[rowId][colId].alignment = alignValue;
 
@@ -257,6 +260,10 @@ function addListenerToAttachCellProperties(cell) {
         rightAlign.style.backgroundColor = activeColorProp;
         break;
     }
+
+    let formulaBar = document.querySelector(".formula-bar");
+    formulaBar.value = cellProp.formula;
+    cell.value = cellProp.value;
   });
 }
 
