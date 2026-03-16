@@ -8,32 +8,6 @@ for (let i = 0; i < numberOfRows; i++) {
 
       if (cellProp.value === cell.innerText) return;
 
-      console.log(
-        "cell inner text is ",
-        cell.innerText,
-        "for row",
-        row,
-        "and col",
-        col,
-      );
-      console.log(
-        "cell prop value is",
-        cellProp.value,
-        "for row",
-        row,
-        "and col",
-        col,
-      );
-
-      console.log(
-        "cell prop formula is",
-        cellProp.formula,
-        "for row",
-        row,
-        "and col",
-        col,
-      );
-
       cellProp.value = cell.innerText;
       removeChildAddress(cellProp.formula, address);
       cellProp.formula = "";
@@ -54,36 +28,55 @@ formulaBar.addEventListener("keydown", (e) => {
 
     if (inputFormula !== cellProp.formula)
       removeChildAddress(cellProp.formula, address);
+
+    addChildToGraphComponent(inputFormula, address);
+
+    if (isGraphCyclic()) {
+      alert("graph contains cycle. Unable to calculate");
+      removeChildFromGraphComponent(inputFormula);
+      return;
+    }
+
     let evaluatedValue = evaluateInputFormula(inputFormula, address);
     updateCellAndFormula(evaluatedValue, inputFormula, address);
     updateChildrenAddress(address);
   }
 });
 
+function addChildToGraphComponent(formula, childAdress) {
+  let [childRowID, childColID] = getClickedCellValue(childAdress);
+
+  let encodedFormula = formula.split(" ");
+
+  for (let i = 0; i < encodedFormula.length; i++) {
+    let asciiValue = encodedFormula[i].charCodeAt(0);
+    if (asciiValue >= 65 && asciiValue <= 90) {
+      let [parentRowID, parentColId] = getClickedCellValue(encodedFormula[i]);
+      graphComponentMatrix[parentRowID][parentColId].push([
+        childRowID,
+        childColID,
+      ]);
+    }
+  }
+}
+
+function removeChildFromGraphComponent(formula) {
+  let encodedFormula = formula.split(" ");
+
+  for (let i = 0; i < encodedFormula.length; i++) {
+    let asciiValue = encodedFormula[i].charCodeAt(0);
+    if (asciiValue >= 65 && asciiValue <= 90) {
+      let [parentRowID, parentColId] = getClickedCellValue(encodedFormula[i]);
+      graphComponentMatrix[parentRowID][parentColId].pop();
+    }
+  }
+}
+
 function updateChildrenAddress(parentAddress) {
-  console.log("we are inside update children address");
   let [parentRow, parentCol] = getClickedCellValue(parentAddress);
   let children = sheetDB[parentRow][parentCol].children;
-  console.log(
-    "children for parentRow",
-    parentRow,
-    "parentCol",
-    parentCol,
-    "for parent",
-    parentAddress,
-    "is",
-    children,
-  );
 
   for (let i = 0; i < children.length; i++) {
-    console.log(
-      "we are inside for loop for update children address with children address as",
-      children[i],
-      "for row",
-      parentRow,
-      "for col",
-      parentCol,
-    );
     let childAdress = children[i];
     let [childRow, childCol] = getClickedCellValue(childAdress);
     let childFormula = sheetDB[childRow][childCol].formula;
@@ -94,11 +87,9 @@ function updateChildrenAddress(parentAddress) {
 }
 
 function removeChildAddress(formula, childAdress) {
-  console.log("we are inside remove child address");
   let decodedFormula = formula.split(" ");
-  console.log("decoded formula is", decodedFormula);
+
   for (let i = 0; i < decodedFormula.length; i++) {
-    console.log("we are inside for loop for remove child address");
     let asciiValue = decodedFormula[i].charCodeAt(0);
     if (asciiValue >= 65 && asciiValue <= 90) {
       let [parentRow, parentCol] = getClickedCellValue(decodedFormula[i]);
